@@ -1,6 +1,6 @@
-FROM docker.io/ubuntu:20.04
+FROM docker.io/ubuntu:16.04
 
-ARG VERSION=0.0
+ARG VERSION=1.3
 ARG SOURCE_DIR=spc-web-gateway-$VERSION
 ARG TEMP_DIR=/tmp/spc-web-gateway-install
 ARG UID=1337
@@ -14,7 +14,17 @@ EXPOSE 16000/tcp
 
 RUN groupadd -g $GID $SPC_GW_USER
 RUN useradd -r -u $UID -g $GID $SPC_GW_USER
-RUN apt-get update && apt-get upgrade -y && apt-get install -y openssl libssl1.1
+RUN apt-get update && apt-get upgrade -y && apt-get install -y openssl 
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install libssl1.1
+RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb \
+    && dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+
 
 WORKDIR $TEMP_DIR
 COPY $SOURCE_DIR $TEMP_DIR/
